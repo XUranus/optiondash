@@ -6,7 +6,7 @@ All endpoints return JSON. Dates are `YYYY-MM-DD` format. Timestamps are ISO 860
 
 ---
 
-## Health
+## Health & Configuration
 
 ### `GET /api/health`
 
@@ -19,6 +19,19 @@ Health check endpoint.
   "service": "optiondash-api",
   "timestamp": "2026-04-27T12:00:00.000000+00:00"
 }
+```
+
+### `GET /api/tickers`
+
+Returns the list of configured supported tickers. The ticker list is configurable via the `SUPPORTED_TICKERS` environment variable (comma-separated).
+
+**Response**
+```json
+{
+  "tickers": ["SPY", "QQQ", "IWM", "TLT", "XLF"],
+  "default": "SPY"
+}
+```
 ```
 
 ---
@@ -304,13 +317,36 @@ Manually trigger a data snapshot capture for a ticker.
 
 ## Error Responses
 
-All endpoints return errors in this format:
+All endpoints return errors in a consistent format:
 
 ```json
 {
   "error": "error_code",
-  "message": "Human-readable description"
+  "message": "Human-readable description",
+  "timestamp": "2026-04-27T12:00:00.000000+00:00",
+  "details": {
+    "ticker": "TSLA",
+    "supported": ["SPY", "QQQ", "IWM", "TLT", "XLF"]
+  }
 }
 ```
 
-HTTP status codes: `200` (success), `500` (server error).
+| Field | Type | Description |
+|-------|------|-------------|
+| `error` | string | Machine-readable error code |
+| `message` | string | Human-readable description |
+| `timestamp` | string | ISO 8601 timestamp of the error |
+| `details` | object | Optional — extra context (ticker, supported values, etc.) |
+
+### Error Codes
+
+| Code | HTTP Status | Meaning |
+|------|-------------|---------|
+| `unsupported_ticker` | 400 | Ticker is not in the configured supported list |
+| `data_source_error` | 502 | Failed to fetch data from Yahoo Finance |
+| `no_data` | 404 | No data available for the requested ticker/endpoint |
+| `no_valid_tickers` | 400 | None of the requested tickers are supported |
+| `snapshot_error` | 500 | Snapshot capture failed |
+| `dashboard_error` | 500 | Dashboard computation failed |
+
+HTTP status codes: `200` (success), `400` (bad request), `404` (not found), `500` (server error), `502` (upstream data source error).

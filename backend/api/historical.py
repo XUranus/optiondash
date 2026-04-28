@@ -7,10 +7,8 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, jsonify, request
 
-from services.market_data import (
-    get_options_chain,
-    get_historical_prices,
-)
+from config import Config
+from services.market_data import get_options_chain, get_historical_prices
 from services.greeks_engine import compute_chain_greeks
 from services.max_pain import calculate_max_pain
 from services.pcr import calculate_pcr
@@ -18,17 +16,26 @@ from services.gex import calculate_gex
 from services.volatility import calculate_hv, calculate_atm_iv, calculate_vrp, calculate_skew_25d
 from database.connection import db
 from utils.helpers import safe_int, safe_float
+from utils.errors import error_response, ticker_not_supported, data_source_error
 
 logger = logging.getLogger(__name__)
 
 historical_bp = Blueprint("historical", __name__)
 
 
+def _validate(ticker: str) -> tuple | None:
+    if ticker not in Config.SUPPORTED_TICKERS:
+        return ticker_not_supported(ticker)
+    return None
+
+
 @historical_bp.route("/api/historical/max-pain-vs-price", methods=["GET"])
 def max_pain_vs_price():
-    """Get historical max pain vs spot price trend."""
     ticker = request.args.get("ticker", "SPY").upper()
     days = int(request.args.get("days", 90))
+    err = _validate(ticker)
+    if err:
+        return err
 
     rows = db.execute(
         "SELECT date, spot_price, max_pain FROM daily_snapshots "
@@ -36,7 +43,6 @@ def max_pain_vs_price():
         "ORDER BY date ASC",
         (ticker, f"-{days}"),
     )
-
     return jsonify({
         "ticker": ticker,
         "dates": [r["date"] for r in rows],
@@ -47,9 +53,11 @@ def max_pain_vs_price():
 
 @historical_bp.route("/api/historical/pcr-gex", methods=["GET"])
 def pcr_gex_history():
-    """Get historical PCR and GEX trends."""
     ticker = request.args.get("ticker", "SPY").upper()
     days = int(request.args.get("days", 90))
+    err = _validate(ticker)
+    if err:
+        return err
 
     rows = db.execute(
         "SELECT date, pcr_volume, pcr_oi, gex FROM daily_snapshots "
@@ -57,7 +65,6 @@ def pcr_gex_history():
         "ORDER BY date ASC",
         (ticker, f"-{days}"),
     )
-
     return jsonify({
         "ticker": ticker,
         "dates": [r["date"] for r in rows],
@@ -69,9 +76,11 @@ def pcr_gex_history():
 
 @historical_bp.route("/api/historical/volatility", methods=["GET"])
 def volatility_history():
-    """Get historical volatility metrics."""
     ticker = request.args.get("ticker", "SPY").upper()
     days = int(request.args.get("days", 90))
+    err = _validate(ticker)
+    if err:
+        return err
 
     rows = db.execute(
         "SELECT date, atm_iv, hv30, vrp FROM daily_snapshots "
@@ -79,7 +88,6 @@ def volatility_history():
         "ORDER BY date ASC",
         (ticker, f"-{days}"),
     )
-
     return jsonify({
         "ticker": ticker,
         "dates": [r["date"] for r in rows],
@@ -91,9 +99,11 @@ def volatility_history():
 
 @historical_bp.route("/api/historical/skew", methods=["GET"])
 def skew_history():
-    """Get historical 25-delta skew."""
     ticker = request.args.get("ticker", "SPY").upper()
     days = int(request.args.get("days", 90))
+    err = _validate(ticker)
+    if err:
+        return err
 
     rows = db.execute(
         "SELECT date, skew_25d FROM daily_snapshots "
@@ -101,7 +111,6 @@ def skew_history():
         "ORDER BY date ASC",
         (ticker, f"-{days}"),
     )
-
     return jsonify({
         "ticker": ticker,
         "dates": [r["date"] for r in rows],
@@ -115,6 +124,9 @@ def take_snapshot():
     data = request.get_json(silent=True) or {}
     ticker = data.get("ticker", "SPY").upper()
     date_str = data.get("date", datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+    err = _validate(ticker)
+    if err:
+        return err
 
     try:
         chain = get_options_chain(ticker)
@@ -126,7 +138,6 @@ def take_snapshot():
         max_pain_result = calculate_max_pain(calls, puts)
         pcr_result = calculate_pcr(calls, puts)
         gex_result = calculate_gex(calls, puts, spot)
-
         atm_iv = calculate_atm_iv(calls, puts, spot)
 
         prices_df = get_historical_prices(ticker, period="90d")
@@ -134,27 +145,20 @@ def take_snapshot():
         vrp = calculate_vrp(atm_iv, hv30)
         skew = calculate_skew_25d(calls, puts, spot)
 
-        # Upsert daily snapshot
         db.execute(
-            """
-            INSERT OR REPLACE INTO daily_snapshots
+            """INSERT OR REPLACE INTO daily_snapshots
             (date, ticker, spot_price, max_pain, pcr_volume, pcr_oi, gex,
              atm_iv, hv30, vrp, skew_25d,
              total_call_volume, total_put_volume, total_call_oi, total_put_oi)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                date_str, ticker, spot,
-                max_pain_result["max_pain_strike"],
-                pcr_result["pcr_volume"], pcr_result["pcr_oi"],
-                gex_result["value"],
-                atm_iv, hv30, vrp, skew,
-                pcr_result["total_call_volume"], pcr_result["total_put_volume"],
-                pcr_result["total_call_oi"], pcr_result["total_put_oi"],
-            ),
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (date_str, ticker, spot,
+             max_pain_result["max_pain_strike"],
+             pcr_result["pcr_volume"], pcr_result["pcr_oi"],
+             gex_result["value"], atm_iv, hv30, vrp, skew,
+             pcr_result["total_call_volume"], pcr_result["total_put_volume"],
+             pcr_result["total_call_oi"], pcr_result["total_put_oi"]),
         )
 
-        # Store strike-level data
         strike_rows = []
         for side_key, df in (("calls", calls), ("puts", puts)):
             for _, row in df.iterrows():
@@ -174,22 +178,18 @@ def take_snapshot():
                 ))
 
         db.execute_many(
-            """
-            INSERT OR REPLACE INTO strike_snapshots
+            """INSERT OR REPLACE INTO strike_snapshots
             (date, ticker, expiration, strike,
              call_oi, put_oi, call_volume, put_volume,
              call_iv, put_iv, call_gamma, put_gamma, call_delta, put_delta)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             strike_rows,
         )
 
         return jsonify({
-            "status": "ok",
-            "ticker": ticker,
-            "date": date_str,
+            "status": "ok", "ticker": ticker, "date": date_str,
             "records_created": len(strike_rows),
         })
     except Exception as e:
         logger.exception(f"Snapshot failed for {ticker}")
-        return jsonify({"error": "snapshot_error", "message": str(e)}), 500
+        return data_source_error(ticker, "snapshot", e)

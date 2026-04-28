@@ -7,11 +7,15 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, jsonify, request
 
+from config import Config
+from services.live_cache import get_cached
 from services.market_data import get_ticker_info, get_options_chain, get_expirations
 from services.greeks_engine import compute_chain_greeks
 from services.max_pain import calculate_max_pain
 from services.pcr import calculate_pcr
 from services.gex import calculate_gex
+from services.volatility import calculate_atm_iv
+from utils.errors import error_response, ticker_not_supported, data_source_error
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +28,16 @@ def dashboard_summary():
     ticker = request.args.get("ticker", "SPY").upper()
     expiration = request.args.get("expiration")
 
+    if ticker not in Config.SUPPORTED_TICKERS:
+        return ticker_not_supported(ticker)
+
+    # 1. Try live cache
+    cached = get_cached(ticker, "summary")
+    if cached:
+        if not expiration or cached.get("expiration_used") == expiration:
+            return jsonify(cached)
+
+    # 2. Fall back to direct fetch
     try:
         info = get_ticker_info(ticker)
         chain = get_options_chain(ticker, expiration)
@@ -35,10 +49,7 @@ def dashboard_summary():
         max_pain_result = calculate_max_pain(calls, puts)
         pcr_result = calculate_pcr(calls, puts)
         gex_result = calculate_gex(calls, puts, chain["spot_price"])
-
-        # ATM IV from the option nearest the spot price
-        atm_iv = _get_atm_iv(calls, puts, chain["spot_price"])
-
+        atm_iv = calculate_atm_iv(calls, puts, chain["spot_price"])
         deviation = round(chain["spot_price"] - max_pain_result["max_pain_strike"], 2)
 
         return jsonify({
@@ -64,36 +75,26 @@ def dashboard_summary():
         })
     except Exception as e:
         logger.exception(f"Dashboard summary failed for {ticker}")
-        return jsonify({"error": "dashboard_error", "message": str(e)}), 500
+        return data_source_error(ticker, "dashboard_summary", e)
 
 
 @dashboard_bp.route("/api/dashboard/expirations", methods=["GET"])
 def dashboard_expirations():
     """Get available expiration dates for a ticker."""
     ticker = request.args.get("ticker", "SPY").upper()
+
+    if ticker not in Config.SUPPORTED_TICKERS:
+        return ticker_not_supported(ticker)
+
+    # 1. Try live cache
+    cached = get_cached(ticker, "expirations")
+    if cached:
+        return jsonify(cached)
+
+    # 2. Fall back to direct fetch
     try:
         exps = get_expirations(ticker)
-        return jsonify({
-            "ticker": ticker,
-            "expirations": exps,
-        })
+        return jsonify({"ticker": ticker, "expirations": exps})
     except Exception as e:
         logger.exception(f"Expirations fetch failed for {ticker}")
-        return jsonify({"error": "expirations_error", "message": str(e)}), 500
-
-
-def _get_atm_iv(calls, puts, spot_price) -> float:
-    """Get ATM implied volatility by averaging call and put IV nearest spot."""
-    iv_col_c = "implied_volatility" if "implied_volatility" in calls.columns else None
-    iv_col_p = "implied_volatility" if "implied_volatility" in puts.columns else None
-
-    if iv_col_c is None and iv_col_p is None:
-        return 0.0
-
-    ivs = []
-    for df, iv_col in ((calls, iv_col_c), (puts, iv_col_p)):
-        if iv_col and not df.empty:
-            df_sorted = df.iloc[(df["strike"] - spot_price).abs().argsort()]
-            ivs.append(float(df_sorted[iv_col].iloc[0]))
-
-    return sum(ivs) / len(ivs) if ivs else 0.0
+        return data_source_error(ticker, "expirations", e)

@@ -10,8 +10,12 @@ A lightweight options market analysis platform that analyzes option chain data (
 
 - **Dashboard** — At-a-glance view of Spot Price, Max Pain, Put/Call Ratio, and Gamma Exposure for any ticker
 - **Strike Analysis** — OI Wall charts, Max Pain curves, and GEX distributions per strike with interactive ECharts
-- **Multi-Ticker Comparison** — Side-by-side comparison of SPY, QQQ, IWM, TLT, XLF with anomaly detection
+- **Multi-Ticker Comparison** — Side-by-side comparison with anomaly detection (tickers configurable)
 - **Historical Trends** — Time-series charts for Max Pain, PCR, GEX, Volatility, and 25-Delta Skew
+- **URL-Based Routing** — `/dashboard`, `/strikes`, `/comparison`, `/historical` with `?ticker=` query params
+- **Background Polling** — Pre-fetches data every 5 minutes and stores in local SQLite cache for instant API responses
+- **Configurable Tickers** — Managed via `SUPPORTED_TICKERS` env var, frontend fetches from `GET /api/tickers`
+- **Robust Error Handling** — Consistent JSON error format with error codes, messages, timestamps, and details
 - **Auto-Refresh** — 5-minute polling during trading sessions
 - **Daily Snapshots** — Automated data collection via APScheduler for historical analysis
 
@@ -78,7 +82,7 @@ optiondash/
 │   ├── config.py                 # Configuration (DB path, cache TTL, tickers)
 │   ├── requirements.txt          # Python dependencies
 │   ├── api/                      # REST API blueprints
-│   │   ├── health.py             # GET /api/health
+│   │   ├── health.py             # GET /api/health, /api/tickers
 │   │   ├── dashboard.py          # GET /api/dashboard/summary, /expirations
 │   │   ├── strikes.py            # GET /api/strikes/oi-wall, /max-pain-curve, /gex-distribution
 │   │   ├── comparison.py         # GET /api/comparison/overview
@@ -90,20 +94,23 @@ optiondash/
 │   │   ├── pcr.py                # Put/Call Ratio calculation
 │   │   ├── gex.py                # Gamma Exposure calculation
 │   │   ├── volatility.py         # HV, VRP, 25-Delta Skew
-│   │   └── anomaly.py            # Anomaly detection (OI spikes, PCR extremes, GEX flips)
+│   │   ├── anomaly.py            # Anomaly detection (OI spikes, PCR extremes, GEX flips)
+│   │   └── live_cache.py         # SQLite-backed cache for pre-fetched data
 │   ├── scheduler/
-│   │   └── jobs.py               # APScheduler daily snapshot job
+│   │   ├── jobs.py               # APScheduler daily snapshot + live poller
+│   │   └── poller.py             # Background poller: fetches all tickers periodically
 │   ├── database/
 │   │   ├── connection.py         # Thread-safe SQLite with WAL mode
 │   │   └── schema.sql            # DDL for daily_snapshots + strike_snapshots
 │   └── utils/
 │       ├── cache.py              # TTL cache (cachetools)
 │       ├── rate_limiter.py       # Token bucket rate limiter
-│       └── helpers.py            # Safe numeric conversions, formatting
+│       ├── helpers.py            # Safe numeric conversions, formatting
+│       └── errors.py             # Consistent error response formatting
 ├── frontend/
 │   ├── src/
 │   │   ├── App.tsx               # Main layout with tab navigation
-│   │   ├── api/                  # API client layer (axios)
+│   │   ├── api/                  # API client layer (axios, tickers, ...)
 │   │   ├── components/           # Reusable UI components
 │   │   │   ├── Layout.tsx        # Page shell
 │   │   │   ├── MetricCard.tsx    # KPI card
@@ -133,6 +140,7 @@ optiondash/
 | Endpoint | Method | Params | Description |
 |----------|--------|--------|-------------|
 | `/api/health` | GET | — | Health check |
+| `/api/tickers` | GET | — | Supported tickers list |
 | `/api/dashboard/summary` | GET | `ticker`, `?expiration=` | Core indicators |
 | `/api/dashboard/expirations` | GET | `ticker` | Available expiration dates |
 | `/api/strikes/oi-wall` | GET | `ticker`, `?expiration=` | OI by strike |
@@ -165,6 +173,10 @@ Environment variables (all optional, with sensible defaults):
 | `RATE_LIMIT_RPS` | `2.0` | yfinance max requests/sec |
 | `RISK_FREE_RATE` | `0.0525` | Risk-free rate for Black-Scholes |
 | `FLASK_PORT` | `5001` | Backend server port |
+| `SUPPORTED_TICKERS` | `SPY,QQQ,IWM,TLT,XLF` | Comma-separated ticker list |
+| `POLL_INTERVAL_SEC` | `300` | Background poll interval (seconds) |
+| `LIVE_CACHE_TTL_SEC` | `600` | Live cache staleness threshold |
+| `LIVE_CACHE_RETENTION_DAYS` | `7` | Cache cleanup age (days) |
 | `SNAPSHOT_HOUR` | `16` | Daily snapshot hour (ET) |
 | `SNAPSHOT_MINUTE` | `30` | Daily snapshot minute (ET) |
 

@@ -48,3 +48,16 @@ CREATE TABLE IF NOT EXISTS strike_snapshots (
 CREATE INDEX IF NOT EXISTS idx_daily_ticker_date ON daily_snapshots(ticker, date);
 CREATE INDEX IF NOT EXISTS idx_strike_ticker_date ON strike_snapshots(ticker, date);
 CREATE INDEX IF NOT EXISTS idx_strike_expiration ON strike_snapshots(ticker, expiration);
+
+-- Live cache: pre-fetched data to accelerate API responses
+CREATE TABLE IF NOT EXISTS live_cache (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ticker TEXT NOT NULL,
+    cache_key TEXT NOT NULL,              -- e.g. 'summary', 'chain:2026-05-01', 'expirations'
+    data_json TEXT NOT NULL,              -- JSON-serialized response payload
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(ticker, cache_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_live_cache_ticker ON live_cache(ticker);
+CREATE INDEX IF NOT EXISTS idx_live_cache_updated ON live_cache(updated_at);

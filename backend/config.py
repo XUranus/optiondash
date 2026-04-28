@@ -15,8 +15,14 @@ class Config:
         "OPTIONDASH_DB", os.path.join(BASE_DIR, "data", "optiondash.db")
     )
 
-    # Supported tickers
-    SUPPORTED_TICKERS = ["SPY", "QQQ", "IWM", "TLT", "XLF"]
+    # Supported tickers — configurable via env var (comma-separated)
+    SUPPORTED_TICKERS = [
+        t.strip().upper()
+        for t in os.environ.get(
+            "SUPPORTED_TICKERS", "SPY,QQQ,IWM,TLT,XLF"
+        ).split(",")
+        if t.strip()
+    ]
 
     # Cache TTL in seconds (5 minutes)
     CACHE_TTL = int(os.environ.get("CACHE_TTL", 300))
@@ -41,3 +47,12 @@ class Config:
     # Scheduler
     SNAPSHOT_HOUR = int(os.environ.get("SNAPSHOT_HOUR", 16))  # ET 16:30
     SNAPSHOT_MINUTE = int(os.environ.get("SNAPSHOT_MINUTE", 30))
+
+    # Background poller: fetch data every N seconds to keep local cache warm
+    POLL_INTERVAL_SEC = int(os.environ.get("POLL_INTERVAL_SEC", 300))  # 5 min
+
+    # Live cache retention: how many seconds before data is considered stale
+    LIVE_CACHE_TTL_SEC = int(os.environ.get("LIVE_CACHE_TTL_SEC", 600))  # 10 min
+
+    # Live cache cleanup: delete entries older than N days
+    LIVE_CACHE_RETENTION_DAYS = int(os.environ.get("LIVE_CACHE_RETENTION_DAYS", 7))

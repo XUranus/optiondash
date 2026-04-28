@@ -1,17 +1,20 @@
 import React from 'react';
 import { Select } from 'antd';
-import { SUPPORTED_TICKERS } from '../utils/constants';
 import type { Ticker } from '../types';
 
 interface TickerSelectorProps {
   value: Ticker;
   onChange: (ticker: Ticker) => void;
+  tickers: Ticker[];
+  loading?: boolean;
   className?: string;
 }
 
 const TickerSelector: React.FC<TickerSelectorProps> = ({
   value,
   onChange,
+  tickers,
+  loading = false,
   className,
 }) => {
   return (
@@ -20,7 +23,8 @@ const TickerSelector: React.FC<TickerSelectorProps> = ({
       onChange={(v) => onChange(v as Ticker)}
       className={className}
       style={{ width: 120 }}
-      options={SUPPORTED_TICKERS.map((t) => ({ label: t, value: t }))}
+      loading={loading}
+      options={tickers.map((t) => ({ label: t, value: t }))}
     />
   );
 };

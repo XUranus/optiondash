@@ -59,6 +59,40 @@ Yahoo Finance does not provide historical options chain data. OptionDash builds 
 
 Data accumulates over time. On first run, historical charts will be empty until snapshots have been collected.
 
+## Live Cache & Background Polling
+
+To accelerate API response times, OptionDash includes a **background poller** that continuously pre-fetches data from Yahoo Finance and stores it in a local SQLite table (`live_cache`). This avoids slow on-demand yfinance calls for every frontend request.
+
+### How It Works
+
+1. On startup, the poller runs an initial fetch for all configured tickers
+2. A recurring APScheduler job polls all tickers every `POLL_INTERVAL_SEC` (default: 300s = 5 min)
+3. For each ticker, it fetches and computes: spot info, expirations, option chain, Greeks, Max Pain, PCR, GEX, ATM IV, HV30, VRP, and 25Δ Skew
+4. Results are stored as JSON in the `live_cache` table
+5. API endpoints check the cache first; if data is fresh (within `LIVE_CACHE_TTL_SEC`, default 10 min), it's returned instantly
+6. If the cache is stale or missing, the endpoint falls back to a direct yfinance call
+7. Entries older than `LIVE_CACHE_RETENTION_DAYS` (default: 7) are automatically cleaned up
+
+### Cache Keys
+
+| Key | Content | Used By |
+|-----|---------|---------|
+| `info` | Ticker info (spot, daily change) | Dashboard, Comparison |
+| `expirations` | Available expiration dates | Expiration pickers |
+| `summary` | Full dashboard summary JSON | Dashboard API |
+| `oi_wall` | OI by strike | Strikes API |
+| `max_pain_curve` | Max Pain curve data | Strikes API |
+| `gex_distribution` | GEX per strike | Strikes API |
+| `volatility` | IV, HV30, VRP, skew | Volatility display |
+
+### Configuration
+
+| Env Var | Default | Description |
+|---------|---------|-------------|
+| `POLL_INTERVAL_SEC` | `300` | Seconds between poll cycles |
+| `LIVE_CACHE_TTL_SEC` | `600` | Max age before cache is considered stale |
+| `LIVE_CACHE_RETENTION_DAYS` | `7` | Auto-cleanup threshold for old entries |
+
 ## Schema
 
 ### daily_snapshots
@@ -68,3 +102,7 @@ One row per ticker per day. Contains all derived metrics: spot_price, max_pain, 
 ### strike_snapshots
 
 One row per strike per expiration per ticker per day. Contains strike-level OI, volume, IV, gamma, and delta. Used to reconstruct OI Wall and GEX distribution charts for historical analysis.
+
+### live_cache
+
+Pre-fetched data cache for instant API responses. Stores JSON-serialized payloads keyed by (ticker, cache_key). Auto-cleaned of entries older than the retention period.

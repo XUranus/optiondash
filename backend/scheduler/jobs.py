@@ -105,7 +105,8 @@ def daily_snapshot_job():
 
 
 def start_scheduler():
-    """Start the background scheduler."""
+    """Start the background scheduler with daily snapshot + live poller."""
+    # Daily snapshot at market close
     scheduler.add_job(
         daily_snapshot_job,
         trigger="cron",
@@ -115,9 +116,30 @@ def start_scheduler():
         id="daily_snapshot",
         replace_existing=True,
     )
+
+    # Background poller runs on a regular interval to keep live_cache warm
+    from scheduler.poller import poll_all_tickers
+
+    scheduler.add_job(
+        poll_all_tickers,
+        trigger="interval",
+        seconds=Config.POLL_INTERVAL_SEC,
+        id="live_poller",
+        replace_existing=True,
+    )
+
+    # Run an initial poll immediately (non-blocking)
+    scheduler.add_job(
+        poll_all_tickers,
+        trigger="date",
+        id="live_poller_initial",
+        replace_existing=True,
+    )
+
     scheduler.start()
     logger.info(
-        f"Scheduler started: daily snapshot at {Config.SNAPSHOT_HOUR:02d}:{Config.SNAPSHOT_MINUTE:02d} ET"
+        f"Scheduler started: daily snapshot at {Config.SNAPSHOT_HOUR:02d}:{Config.SNAPSHOT_MINUTE:02d} ET, "
+        f"live poller every {Config.POLL_INTERVAL_SEC}s"
     )
 
 

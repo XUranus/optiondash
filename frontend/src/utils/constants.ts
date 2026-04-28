@@ -1,9 +1,9 @@
 import type { Ticker } from '../types';
 
-// Supported tickers
-export const SUPPORTED_TICKERS: Ticker[] = ['SPY', 'QQQ', 'IWM', 'TLT', 'XLF'];
+// These are fallback defaults — actual tickers are fetched from GET /api/tickers
+export const FALLBACK_TICKERS: Ticker[] = ['SPY', 'QQQ', 'IWM', 'TLT', 'XLF'];
 
-// Default ticker
+// Default ticker fallback
 export const DEFAULT_TICKER: Ticker = 'SPY';
 
 // Auto-refresh interval in milliseconds (5 minutes)

@@ -144,6 +144,10 @@ For a single-server deployment, this is not an issue.
 | `FLASK_HOST` | `0.0.0.0` | Flask bind address |
 | `FLASK_PORT` | `5001` | Flask port |
 | `CORS_ORIGINS` | `http://localhost:5173` | Allowed CORS origins (comma-separated) |
+| `SUPPORTED_TICKERS` | `SPY,QQQ,IWM,TLT,XLF` | Comma-separated ticker list |
+| `POLL_INTERVAL_SEC` | `300` | Background poll interval in seconds |
+| `LIVE_CACHE_TTL_SEC` | `600` | Live cache staleness threshold |
+| `LIVE_CACHE_RETENTION_DAYS` | `7` | Cache cleanup age in days |
 | `SNAPSHOT_HOUR` | `16` | Daily snapshot hour (ET, 24h) |
 | `SNAPSHOT_MINUTE` | `30` | Daily snapshot minute (ET) |
 

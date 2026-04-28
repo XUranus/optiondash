@@ -1,10 +1,12 @@
 """
-Health check API blueprint.
+Health check and configuration API blueprint.
 """
 
 from datetime import datetime, timezone
 
 from flask import Blueprint, jsonify
+
+from config import Config
 
 health_bp = Blueprint("health", __name__)
 
@@ -17,5 +19,16 @@ def health_check():
             "status": "ok",
             "service": "optiondash-api",
             "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+    )
+
+
+@health_bp.route("/api/tickers", methods=["GET"])
+def list_tickers():
+    """Return the list of configured supported tickers."""
+    return jsonify(
+        {
+            "tickers": Config.SUPPORTED_TICKERS,
+            "default": Config.SUPPORTED_TICKERS[0] if Config.SUPPORTED_TICKERS else "SPY",
         }
     )

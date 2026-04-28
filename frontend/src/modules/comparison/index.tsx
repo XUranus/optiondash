@@ -1,17 +1,23 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Table, Tag, Tooltip } from 'antd';
 import { useTickerData } from '../../hooks/useTickerData';
 import { fetchComparison } from '../../api/comparison';
-import { SUPPORTED_TICKERS, COLORS } from '../../utils/constants';
+import { fetchTickers } from '../../api/health';
+import { FALLBACK_TICKERS, COLORS } from '../../utils/constants';
 import type { ComparisonRow, Ticker } from '../../types';
-import { formatLargeNumber } from '../../utils/format';
-
-const DEFAULT_TICKERS: Ticker[] = ['SPY', 'QQQ', 'IWM', 'TLT', 'XLF'];
 
 const ComparisonModule: React.FC = () => {
+  const [tickers, setTickers] = useState<Ticker[]>(FALLBACK_TICKERS);
+
+  useEffect(() => {
+    fetchTickers()
+      .then((res) => setTickers(res.tickers))
+      .catch(() => setTickers(FALLBACK_TICKERS));
+  }, []);
+
   const fetchFn = useCallback(
-    () => fetchComparison(DEFAULT_TICKERS),
-    [],
+    () => fetchComparison(tickers),
+    [tickers],
   );
   const { data, loading, error } = useTickerData(fetchFn);
 

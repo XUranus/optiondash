@@ -128,9 +128,15 @@ export interface SkewData {
 }
 
 // Common types
-export type Ticker = 'SPY' | 'QQQ' | 'IWM' | 'TLT' | 'XLF';
+export type Ticker = string;
+
+export interface TickersResponse {
+  tickers: string[];
+  default: string;
+}
 
 export interface ApiError {
   error: string;
   message: string;
+  details?: Record<string, unknown>;
 }
