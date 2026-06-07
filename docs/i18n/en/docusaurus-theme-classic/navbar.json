@@ -1,0 +1,22 @@
+{
+  "item.label.用户指南": {
+    "message": "Guide",
+    "description": "Navbar label for user guide sidebar"
+  },
+  "item.label.核心概念": {
+    "message": "Concepts",
+    "description": "Navbar label for core concepts sidebar"
+  },
+  "item.label.系统架构": {
+    "message": "Architecture",
+    "description": "Navbar label for architecture sidebar"
+  },
+  "item.label.API 参考": {
+    "message": "API",
+    "description": "Navbar label for API reference sidebar"
+  },
+  "item.label.开发指南": {
+    "message": "Dev",
+    "description": "Navbar label for dev guide sidebar"
+  }
+}

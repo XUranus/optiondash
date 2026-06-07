@@ -1,0 +1,50 @@
+{
+  "link.title.文档": {
+    "message": "Docs",
+    "description": "Footer link group title"
+  },
+  "link.title.学习": {
+    "message": "Learn",
+    "description": "Footer link group title"
+  },
+  "link.title.更多": {
+    "message": "More",
+    "description": "Footer link group title"
+  },
+  "item.label.快速开始": {
+    "message": "Quick Start",
+    "description": "Footer link label"
+  },
+  "item.label.用户指南": {
+    "message": "User Guide",
+    "description": "Footer link label"
+  },
+  "item.label.API 参考": {
+    "message": "API Reference",
+    "description": "Footer link label"
+  },
+  "item.label.期权基础": {
+    "message": "Options Basics",
+    "description": "Footer link label"
+  },
+  "item.label.希腊字母": {
+    "message": "Greeks",
+    "description": "Footer link label"
+  },
+  "item.label.波动率": {
+    "message": "Volatility",
+    "description": "Footer link label"
+  },
+  "item.label.系统架构": {
+    "message": "Architecture",
+    "description": "Footer link label"
+  },
+  "item.label.开发指南": {
+    "message": "Dev Guide",
+    "description": "Footer link label"
+  },
+  "item.label.部署指南": {
+    "message": "Deployment",
+    "description": "Footer link label"
+  }
+}

@@ -1,0 +1,455 @@
+/**
+ * OptionDash Wiki - Custom Styles
+ * Financial blue theme with light/dark mode support
+ */
+
+/* ===== Light Theme ===== */
+:root {
+  /* Primary palette - financial blue */
+  --ifm-color-primary: #1e40af;
+  --ifm-color-primary-dark: #1b3a9e;
+  --ifm-color-primary-darker: #1a3795;
+  --ifm-color-primary-darkest: #152d7a;
+  --ifm-color-primary-light: #2146c0;
+  --ifm-color-primary-lighter: #2249c9;
+  --ifm-color-primary-lightest: #2a55e0;
+
+  /* Accent palette - financial green */
+  --od-green: #10b981;
+  --od-green-light: #34d399;
+  --od-green-dark: #059669;
+
+  /* Semantic colors */
+  --od-red: #ef4444;
+  --od-yellow: #f59e0b;
+  --od-purple: #8b5cf6;
+
+  /* Surfaces */
+  --od-surface: #ffffff;
+  --od-surface-raised: #f8fafc;
+  --od-border: #e2e8f0;
+
+  /* Code */
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(30, 64, 175, 0.08);
+
+  /* Transitions */
+  --od-transition-speed: 0.3s;
+}
+
+/* ===== Dark Theme ===== */
+[data-theme='dark'] {
+  --ifm-color-primary: #60a5fa;
+  --ifm-color-primary-dark: #3b82f6;
+  --ifm-color-primary-darker: #2563eb;
+  --ifm-color-primary-darkest: #1d4ed8;
+  --ifm-color-primary-light: #93bbfd;
+  --ifm-color-primary-lighter: #a8cbfd;
+  --ifm-color-primary-lightest: #dbeafe;
+
+  --od-green: #34d399;
+  --od-green-light: #6ee7b7;
+  --od-green-dark: #10b981;
+
+  --od-surface: #0f172a;
+  --od-surface-raised: #1e293b;
+  --od-border: #334155;
+
+  --docusaurus-highlighted-code-line-bg: rgba(96, 165, 250, 0.12);
+}
+
+/* ===== Smooth Theme Transitions ===== */
+html {
+  transition:
+    background-color var(--od-transition-speed) ease,
+    color var(--od-transition-speed) ease;
+}
+
+html * {
+  transition:
+    background-color var(--od-transition-speed) ease,
+    border-color var(--od-transition-speed) ease,
+    color var(--od-transition-speed) ease,
+    box-shadow var(--od-transition-speed) ease;
+}
+
+/* ===== Navbar Enhancements ===== */
+.navbar {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+[data-theme='dark'] .navbar {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== Interactive Component Hover Effects ===== */
+.card {
+  border: 1px solid var(--od-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: var(--od-surface-raised);
+  transition:
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(30, 64, 175, 0.15);
+  border-color: var(--ifm-color-primary);
+}
+
+[data-theme='dark'] .card:hover {
+  box-shadow: 0 8px 25px rgba(96, 165, 250, 0.15);
+}
+
+/* ===== Animated Diagram Containers ===== */
+.diagram-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--od-border);
+  background: var(--od-surface-raised);
+  padding: 2rem;
+  margin: 1.5rem 0;
+}
+
+.diagram-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ifm-color-primary), var(--od-green), var(--ifm-color-primary));
+  background-size: 200% 100%;
+  animation: gradientSlide 4s ease-in-out infinite;
+}
+
+@keyframes gradientSlide {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ===== Mermaid Diagram Styles ===== */
+.mermaid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: var(--od-surface-raised);
+  border: 1px solid var(--od-border);
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+[data-theme='dark'] .mermaid {
+  filter: brightness(0.95) saturate(1.1);
+}
+
+/* ===== Metric Cards ===== */
+.metric-card {
+  position: relative;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  background: var(--od-surface-raised);
+  border: 1px solid var(--od-border);
+  overflow: hidden;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.metric-card--blue {
+  border-left: 4px solid var(--ifm-color-primary);
+}
+
+.metric-card--green {
+  border-left: 4px solid var(--od-green);
+}
+
+.metric-card--red {
+  border-left: 4px solid var(--od-red);
+}
+
+.metric-card--yellow {
+  border-left: 4px solid var(--od-yellow);
+}
+
+.metric-card--purple {
+  border-left: 4px solid var(--od-purple);
+}
+
+.metric-card__value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ifm-color-primary);
+}
+
+.metric-card__label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  margin-top: 0.25rem;
+}
+
+/* ===== Data Flow Animation Keyframes ===== */
+@keyframes flowRight {
+  0% { transform: translateX(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes flowDown {
+  0% { transform: translateY(-20px); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(20px); opacity: 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes drawLine {
+  from { stroke-dashoffset: 100%; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Data flow pipe animation */
+.data-flow-pipe {
+  position: relative;
+  height: 4px;
+  background: var(--od-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.data-flow-pipe::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--ifm-color-primary), transparent);
+  animation: flowRight 2s ease-in-out infinite;
+}
+
+.data-flow-pipe--active::after {
+  background: linear-gradient(90deg, transparent, var(--od-green), transparent);
+}
+
+/* ===== Responsive Table Styles ===== */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--od-border);
+  font-size: 0.9rem;
+}
+
+table thead th {
+  background: var(--ifm-color-primary);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] table thead th {
+  background: var(--ifm-color-primary-darkest);
+}
+
+table tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--od-border);
+  vertical-align: top;
+}
+
+table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+table tbody tr:hover {
+  background-color: rgba(30, 64, 175, 0.04);
+}
+
+[data-theme='dark'] table tbody tr:hover {
+  background-color: rgba(96, 165, 250, 0.08);
+}
+
+/* Responsive table on mobile */
+@media screen and (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 0.82rem;
+  }
+
+  table thead th,
+  table tbody td {
+    padding: 0.6rem 0.75rem;
+  }
+}
+
+/* ===== Code Block Enhancements ===== */
+pre {
+  border-radius: 10px;
+  border: 1px solid var(--od-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+pre code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Source Code Pro', monospace;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+/* Inline code styling */
+:not(pre) > code {
+  border-radius: 5px;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.88em;
+  border: 1px solid var(--od-border);
+  background: var(--od-surface-raised);
+}
+
+[data-theme='dark'] :not(pre) > code {
+  border-color: var(--od-border);
+}
+
+/* ===== Custom Admonition Styles for Financial Tips ===== */
+
+/* Bullish signal */
+.admonition-tip {
+  border-left: 4px solid var(--od-green);
+}
+
+.admonition-tip .admonition-heading {
+  color: var(--od-green);
+}
+
+/* Bearish warning */
+.admonition-warning {
+  border-left: 4px solid var(--od-yellow);
+}
+
+/* Risk alert */
+.admonition-danger {
+  border-left: 4px solid var(--od-red);
+}
+
+/* Info/educational */
+.admonition-info {
+  border-left: 4px solid var(--ifm-color-primary);
+}
+
+/* Custom: Bullish signal box */
+.admonition-bullish,
+.alert--bullish {
+  border-left: 4px solid var(--od-green);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+[data-theme='dark'] .admonition-bullish,
+[data-theme='dark'] .alert--bullish {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+/* Custom: Bearish signal box */
+.admonition-bearish,
+.alert--bearish {
+  border-left: 4px solid var(--od-red);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+[data-theme='dark'] .admonition-bearish,
+[data-theme='dark'] .alert--bearish {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Custom: Neutral / Key Takeaway box */
+.admonition-takeaway,
+.alert--takeaway {
+  border-left: 4px solid var(--ifm-color-primary);
+  background: rgba(30, 64, 175, 0.06);
+}
+
+[data-theme='dark'] .admonition-takeaway,
+[data-theme='dark'] .alert--takeaway {
+  background: rgba(96, 165, 250, 0.1);
+}
+
+/* ===== Scrollbar Styling ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--od-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-primary);
+}
+
+/* ===== Utility: Fade-in on scroll (JS-driven) ===== */
+.od-fade-in {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.od-fade-in:nth-child(1) { animation-delay: 0s; }
+.od-fade-in:nth-child(2) { animation-delay: 0.1s; }
+.od-fade-in:nth-child(3) { animation-delay: 0.2s; }
+.od-fade-in:nth-child(4) { animation-delay: 0.3s; }
+.od-fade-in:nth-child(5) { animation-delay: 0.4s; }

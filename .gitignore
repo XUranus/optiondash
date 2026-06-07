@@ -1,3 +1,8 @@
 backend/data/
 .claude/
 .hide/
+
+# Docusaurus
+docs/node_modules/
+docs/build/
+docs/.docusaurus/

@@ -140,3 +140,25 @@ export interface ApiError {
   message: string;
   details?: Record<string, unknown>;
 }
+
+// Macro types
+export interface MacroIndicator {
+  vix: number;
+  tnx: number;
+  tyx: number;
+  irx: number;
+  dxy: number;
+  vvix: number;
+  spread_10y3m: number;
+}
+
+export interface MacroCurrentResponse {
+  indicators: MacroIndicator;
+  updated_at: string;
+}
+
+export interface MacroHistoryResponse {
+  indicators: string[];
+  dates: string[];
+  [key: string]: string[] | number[];
+}

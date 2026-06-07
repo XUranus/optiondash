@@ -61,3 +61,20 @@ CREATE TABLE IF NOT EXISTS live_cache (
 
 CREATE INDEX IF NOT EXISTS idx_live_cache_ticker ON live_cache(ticker);
 CREATE INDEX IF NOT EXISTS idx_live_cache_updated ON live_cache(updated_at);
+
+-- Macro-economic indicator daily snapshots
+CREATE TABLE IF NOT EXISTS macro_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,          -- YYYY-MM-DD
+    vix REAL,
+    tnx REAL,
+    tyx REAL,
+    irx REAL,
+    dxy REAL,
+    vvix REAL,
+    spread_10y3m REAL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_macro_date ON macro_snapshots(date);

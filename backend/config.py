@@ -56,3 +56,13 @@ class Config:
 
     # Live cache cleanup: delete entries older than N days
     LIVE_CACHE_RETENTION_DAYS = int(os.environ.get("LIVE_CACHE_RETENTION_DAYS", 7))
+
+    # Macro-economic indicator ticker symbols (yfinance)
+    MACRO_SYMBOLS = {
+        "VIX": "^VIX",
+        "TNX": "^TNX",
+        "TYX": "^TYX",
+        "IRX": "^IRX",
+        "DXY": "DX-Y.NYB",
+        "VVIX": "^VVIX",
+    }

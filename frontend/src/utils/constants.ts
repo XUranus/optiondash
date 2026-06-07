@@ -28,3 +28,33 @@ export const COLORS = {
 // PCR thresholds
 export const PCR_BEARISH_THRESHOLD = 1.2;
 export const PCR_BULLISH_THRESHOLD = 0.7;
+
+// VIX regime thresholds
+export const VIX_LEVELS = {
+  LOW: 15,
+  MODERATE: 20,
+  ELEVATED: 25,
+  HIGH: 30,
+} as const;
+
+// Macro metric display names
+export const MACRO_LABELS: Record<string, string> = {
+  vix: 'VIX',
+  tnx: '10Y Yield',
+  tyx: '30Y Yield',
+  irx: '13W T-Bill',
+  dxy: 'DXY',
+  vvix: 'VVIX',
+  spread_10y3m: '10Y-3M Spread',
+} as const;
+
+// Macro chart colors
+export const MACRO_COLORS = {
+  vix: '#ef4444',
+  tnx: '#3b82f6',
+  tyx: '#8b5cf6',
+  irx: '#9ca3af',
+  dxy: '#f97316',
+  vvix: '#ec4899',
+  spread: '#22c55e',
+} as const;

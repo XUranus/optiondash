@@ -29,6 +29,7 @@ By the end of this guide, you'll understand:
 7. [Volatility Metrics](07-volatility.md) — IV, HV, and the Volatility Risk Premium
 8. [25-Delta Skew](08-skew.md) — The market's fear gauge
 9. [Putting It All Together](09-putting-it-together.md) — Building a complete analysis workflow
+10. [Macro-Economic Context](10-macro-metrics.md) — VIX, yields, DXY, and the macro backdrop for options
 
 ---
 

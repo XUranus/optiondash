@@ -6,6 +6,7 @@ import {
   BarChartOutlined,
   SwapOutlined,
   LineChartOutlined,
+  FundOutlined,
 } from '@ant-design/icons';
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -14,6 +15,7 @@ import DashboardModule from './modules/dashboard';
 import StrikesModule from './modules/strikes';
 import ComparisonModule from './modules/comparison';
 import HistoricalModule from './modules/historical';
+import MacroModule from './modules/macro';
 import { fetchTickers } from './api/health';
 import type { Ticker } from './types';
 import { DEFAULT_TICKER, FALLBACK_TICKERS } from './utils/constants';
@@ -24,6 +26,7 @@ const ROUTE_TABS: Record<string, string> = {
   '/strikes': 'strikes',
   '/comparison': 'comparison',
   '/historical': 'historical',
+  '/macro': 'macro',
 };
 
 const TAB_ROUTES: Record<string, string> = {
@@ -31,6 +34,7 @@ const TAB_ROUTES: Record<string, string> = {
   strikes: '/strikes',
   comparison: '/comparison',
   historical: '/historical',
+  macro: '/macro',
 };
 
 // ---- Inner app component with router access ----
@@ -120,18 +124,29 @@ const AppContent: React.FC = () => {
         </ErrorBoundary>
       ),
     },
+    {
+      key: 'macro',
+      label: <span><FundOutlined /> Macro</span>,
+      children: (
+        <ErrorBoundary fallbackTitle="Macro module error">
+          <MacroModule />
+        </ErrorBoundary>
+      ),
+    },
   ];
 
   return (
     <Layout>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <TickerSelector
-            value={ticker}
-            onChange={handleTickerChange}
-            tickers={tickers}
-            loading={tickersLoading}
-          />
+          {activeTab !== 'macro' && (
+            <TickerSelector
+              value={ticker}
+              onChange={handleTickerChange}
+              tickers={tickers}
+              loading={tickersLoading}
+            />
+          )}
         </div>
         <span className="text-gray-400 text-xs">
           Data delayed ~15 min via Yahoo Finance
@@ -158,6 +173,7 @@ const App: React.FC = () => {
         <Route path="/strikes" element={<AppContent />} />
         <Route path="/comparison" element={<AppContent />} />
         <Route path="/historical" element={<AppContent />} />
+        <Route path="/macro" element={<AppContent />} />
       </Routes>
     </BrowserRouter>
   );

@@ -103,6 +103,27 @@ def daily_snapshot_job():
         except Exception as e:
             logger.error(f"Snapshot failed for {ticker}: {e}")
 
+    # Macro snapshot
+    try:
+        from services.macro_data import get_macro_current
+
+        macro_data = get_macro_current()
+        ind = macro_data["indicators"]
+        db.execute(
+            """INSERT OR REPLACE INTO macro_snapshots
+            (date, vix, tnx, tyx, irx, dxy, vvix, spread_10y3m)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                date_str,
+                ind.get("vix"), ind.get("tnx"), ind.get("tyx"),
+                ind.get("irx"), ind.get("dxy"), ind.get("vvix"),
+                ind.get("spread_10y3m"),
+            ),
+        )
+        logger.info(f"Macro snapshot saved: VIX={ind.get('vix')}")
+    except Exception as e:
+        logger.error(f"Macro snapshot failed: {e}")
+
 
 def start_scheduler():
     """Start the background scheduler with daily snapshot + live poller."""

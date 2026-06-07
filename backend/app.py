@@ -15,6 +15,7 @@ from api.dashboard import dashboard_bp
 from api.comparison import comparison_bp
 from api.strikes import strikes_bp
 from api.historical import historical_bp
+from api.macro import macro_bp
 from database.connection import db  # noqa: F401 — triggers schema init
 from scheduler.jobs import start_scheduler, stop_scheduler
 
@@ -33,6 +34,7 @@ def create_app() -> Flask:
     app.register_blueprint(comparison_bp)
     app.register_blueprint(strikes_bp)
     app.register_blueprint(historical_bp)
+    app.register_blueprint(macro_bp)
 
     # Logging
     logging.basicConfig(

@@ -41,6 +41,12 @@ def poll_all_tickers():
         except Exception:
             logger.error(f"Poll failed for {ticker}:\n{traceback.format_exc()}")
 
+    # Poll macro indicators
+    try:
+        _poll_macro()
+    except Exception:
+        logger.error(f"Macro poll failed:\n{traceback.format_exc()}")
+
 
 def _poll_ticker(ticker: str):
     """Poll a single ticker and cache all derived data."""
@@ -164,6 +170,19 @@ def _poll_ticker(ticker: str):
     mem_cache.clear()
 
     logger.info(f"Poll complete for {ticker}: {len(all_strikes)} strikes, spot={spot}")
+
+
+def _poll_macro():
+    """Poll macro-economic indicators and store in live_cache."""
+    from services.macro_data import get_macro_current
+
+    data = get_macro_current()
+    set_cached("MACRO", "current", data)
+    ind = data["indicators"]
+    logger.info(
+        f"Macro poll complete: VIX={ind.get('vix')}, TNX={ind.get('tnx')}, "
+        f"DXY={ind.get('dxy')}, Spread={ind.get('spread_10y3m')}"
+    )
 
 
 def _col(df, candidates):

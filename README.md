@@ -4,6 +4,8 @@
 
 A lightweight options market analysis platform that analyzes option chain data (Open Interest, Volume, Implied Volatility, Greeks) to predict short-term price movement, support/resistance levels, and market risk. Built with React + Flask + SQLite, using free data from Yahoo Finance.
 
+**📖 Documentation: [xuranus.github.io/option-dash](https://xuranus.github.io/option-dash/)**
+
 ---
 
 ## Features
@@ -12,11 +14,12 @@ A lightweight options market analysis platform that analyzes option chain data (
 - **Strike Analysis** — OI Wall charts, Max Pain curves, and GEX distributions per strike with interactive ECharts
 - **Multi-Ticker Comparison** — Side-by-side comparison with anomaly detection (tickers configurable)
 - **Historical Trends** — Time-series charts for Max Pain, PCR, GEX, Volatility, and 25-Delta Skew
-- **URL-Based Routing** — `/dashboard`, `/strikes`, `/comparison`, `/historical` with `?ticker=` query params
+- **URL-Based Routing** — `/dashboard`, `/strikes`, `/comparison`, `/historical`, `/macro` with `?ticker=` query params
 - **Background Polling** — Pre-fetches data every 5 minutes and stores in local SQLite cache for instant API responses
 - **Configurable Tickers** — Managed via `SUPPORTED_TICKERS` env var, frontend fetches from `GET /api/tickers`
 - **Robust Error Handling** — Consistent JSON error format with error codes, messages, timestamps, and details
 - **Auto-Refresh** — 5-minute polling during trading sessions
+- **Macro Dashboard** — Real-time VIX, Treasury yields (10Y/30Y), DXY, VVIX with regime shading and trend charts
 - **Daily Snapshots** — Automated data collection via APScheduler for historical analysis
 
 ---
@@ -86,7 +89,8 @@ optiondash/
 │   │   ├── dashboard.py          # GET /api/dashboard/summary, /expirations
 │   │   ├── strikes.py            # GET /api/strikes/oi-wall, /max-pain-curve, /gex-distribution
 │   │   ├── comparison.py         # GET /api/comparison/overview
-│   │   └── historical.py         # 4 GET endpoints + POST /api/historical/snapshot
+│   │   ├── historical.py         # 4 GET endpoints + POST /api/historical/snapshot
+│   │   └── macro.py              # GET /api/macro/current, /api/macro/history
 │   ├── services/                 # Business logic layer
 │   │   ├── market_data.py        # yfinance wrapper with caching & rate limiting
 │   │   ├── greeks_engine.py      # Black-Scholes Greeks via py_vollib_vectorized
@@ -95,6 +99,7 @@ optiondash/
 │   │   ├── gex.py                # Gamma Exposure calculation
 │   │   ├── volatility.py         # HV, VRP, 25-Delta Skew
 │   │   ├── anomaly.py            # Anomaly detection (OI spikes, PCR extremes, GEX flips)
+│   │   ├── macro_data.py         # Macro indicator fetching (VIX, yields, DXY)
 │   │   └── live_cache.py         # SQLite-backed cache for pre-fetched data
 │   ├── scheduler/
 │   │   ├── jobs.py               # APScheduler daily snapshot + live poller
@@ -122,13 +127,14 @@ optiondash/
 │   │   │   ├── dashboard/        # 4 metric cards
 │   │   │   ├── strikes/          # OI Wall, Max Pain curve, GEX distribution
 │   │   │   ├── comparison/       # Multi-ticker comparison table
-│   │   │   └── historical/       # 4 time-series charts
+│   │   │   ├── historical/       # 4 time-series charts
+│   │   │   └── macro/            # Macro dashboard (VIX, yields, DXY)
 │   │   ├── hooks/                # useTickerData, useAutoRefresh
 │   │   ├── types/                # TypeScript interfaces
 │   │   └── utils/                # Formatters, constants, colors
 │   ├── package.json
 │   └── vite.config.ts            # Dev proxy to backend
-├── docs/                         # Module & API documentation
+├── docs/                         # Docusaurus documentation site
 ├── tutorial/                     # Options metrics guidebook
 └── PRD.md                        # Product Requirements Document
 ```
@@ -152,6 +158,8 @@ optiondash/
 | `/api/historical/volatility` | GET | `ticker`, `?days=90` | Historical trend |
 | `/api/historical/skew` | GET | `ticker`, `?days=90` | Historical trend |
 | `/api/historical/snapshot` | POST | `{ticker, date?}` | Manual snapshot |
+| `/api/macro/current` | GET | — | All macro indicators |
+| `/api/macro/history` | GET | `indicators`, `?days=90` | Macro time series |
 
 ---
 
@@ -184,7 +192,7 @@ Environment variables (all optional, with sensible defaults):
 
 ## Data Source
 
-Yahoo Finance via yfinance. Data is delayed approximately 15 minutes. The platform implements token-bucket rate limiting (2 req/sec) and TTL caching (5 min) to avoid IP throttling. See [docs/data-source.md](docs/data-source.md) for details.
+Yahoo Finance via yfinance. Data is delayed approximately 15 minutes. The platform implements token-bucket rate limiting (2 req/sec) and TTL caching (5 min) to avoid IP throttling. See [Data Pipeline](https://xuranus.github.io/option-dash/architecture/data-pipeline/) for details.
 
 ---
 
