@@ -4,7 +4,7 @@
 
 A lightweight options market analysis platform that analyzes option chain data (Open Interest, Volume, Implied Volatility, Greeks) to predict short-term price movement, support/resistance levels, and market risk. Built with React + Flask + SQLite, using free data from Yahoo Finance.
 
-**📖 Documentation: [xuranus.github.io/option-dash](https://xuranus.github.io/option-dash/)**
+**📖 Documentation: [xuranus.github.io/optiondash](https://xuranus.github.io/optiondash/)**
 
 ---
 
@@ -192,7 +192,7 @@ Environment variables (all optional, with sensible defaults):
 
 ## Data Source
 
-Yahoo Finance via yfinance. Data is delayed approximately 15 minutes. The platform implements token-bucket rate limiting (2 req/sec) and TTL caching (5 min) to avoid IP throttling. See [Data Pipeline](https://xuranus.github.io/option-dash/architecture/data-pipeline/) for details.
+Yahoo Finance via yfinance. Data is delayed approximately 15 minutes. The platform implements token-bucket rate limiting (2 req/sec) and TTL caching (5 min) to avoid IP throttling. See [Data Pipeline](https://xuranus.github.io/optiondash/architecture/data-pipeline/) for details.
 
 ---
 

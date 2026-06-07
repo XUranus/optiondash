@@ -12,9 +12,9 @@ const config: Config = {
   },
 
   url: 'https://xuranus.github.io',
-  baseUrl: '/option-dash/',
-  organizationName: 'xuranus',
-  projectName: 'option-dash',
+  baseUrl: '/optiondash/',
+  organizationName: 'XUranus',
+  projectName: 'optiondash',
   trailingSlash: true,
 
   onBrokenLinks: 'warn',
